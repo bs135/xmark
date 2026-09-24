@@ -35,7 +35,7 @@ export const Header: React.FC = () => {
           <Layers className="w-4 h-4 text-slate-950 font-bold" />
         </div>
         <div className="flex items-baseline gap-1.5 pointer-events-none">
-          <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white m-0">xmark</h1>
+          <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white m-0">xMark</h1>
           <span className="text-[10px] text-sky-400 font-semibold px-1.5 py-0.2 bg-sky-950 border border-sky-800 rounded">
             v0.2.0
           </span>
