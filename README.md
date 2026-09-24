@@ -7,6 +7,8 @@
 
 Supported platforms: **Windows**, **macOS** (Apple Silicon), and **Linux**.
 
+![xMark Screenshot](docs/screenshot.png)
+
 ---
 
 ## Table of Contents
