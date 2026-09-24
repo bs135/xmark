@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Minus, Square, Copy, X, Sun, Moon, Languages } from 'lucide-react';
+import { Minus, Square, Copy, X, Sun, Moon, Languages, Info } from 'lucide-react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { useTranslation } from 'react-i18next';
 import { useAppStore, type Language } from '../../store/useAppStore';
+import { AboutDialog } from './AboutDialog';
 
 const appWindow = getCurrentWindow();
 
 export const Header: React.FC = () => {
   const [isMaximized, setIsMaximized] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const theme = useAppStore((s) => s.theme);
   const setTheme = useAppStore((s) => s.setTheme);
   const language = useAppStore((s) => s.language);
@@ -48,6 +50,14 @@ export const Header: React.FC = () => {
       {/* Custom window controls (native title bar is hidden) */}
       <div className="flex items-center h-full">
         <button
+          onClick={() => setAboutOpen(true)}
+          className="h-12 w-11 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 transition"
+          aria-label={t('about.openInfo')}
+          title={t('about.openInfo')}
+        >
+          <Info className="w-4 h-4" />
+        </button>
+        <button
           onClick={() => setLanguage((language === 'en' ? 'vi' : 'en') as Language)}
           className="h-12 w-11 flex items-center justify-center gap-0.5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 transition text-[10px] font-bold uppercase"
           aria-label="Toggle language"
@@ -84,6 +94,7 @@ export const Header: React.FC = () => {
           <X className="w-4 h-4" />
         </button>
       </div>
+      {aboutOpen && <AboutDialog onClose={() => setAboutOpen(false)} />}
     </header>
   );
 };
