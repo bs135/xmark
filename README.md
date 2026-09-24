@@ -125,20 +125,20 @@ src-tauri/target/release/bundle/
    - Click an image in the list to preview it, or the trash icon to remove it from the list.
 
 2. **Configure the watermark (right panel)**
-   - **Text Watermark**: enable the checkbox, enter text content, adjust font size and color.
-   - **Logo/Image**: enable the checkbox, choose a logo file, and drag the slider to adjust scale.
+   - **Text**: enable the checkbox, enter text content, adjust font size and color.
+   - **Logo**: enable the checkbox, choose a logo file, and drag the slider to adjust scale.
    - **Opacity**: adjust from 5% to 100% (default 50%).
    - **Repeat**:
      - *Single Position*: stamp the watermark at one fixed position on a 9-point grid (top-left, center, bottom-right, etc.).
      - *Tile Repeat*: repeat the watermark evenly across the entire image as an anti-copy grid pattern.
-   - **Padding/Margin**: fine-tune the distance from the edges.
+   - **Padding**: fine-tune the distance from the edges.
 
-3. **Live Preview (center panel)**
+3. **Preview (center panel)**
    - See a real-time watermark preview on canvas before exporting.
 
 4. **Batch export (footer bar)**
    - Click **Choose Output Folder** to select where processed images will be saved.
-   - Click **Apply & Export All** to start high-speed, multi-threaded processing powered by Rayon in Rust.
+   - Click **Apply All** to start high-speed, multi-threaded processing powered by Rayon in Rust.
    - Track progress and completion status in the status bar.
 
 ---

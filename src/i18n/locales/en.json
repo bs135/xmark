@@ -17,9 +17,9 @@
     "removeFromList": "Remove from list"
   },
   "watermark": {
-    "settings": "Watermark Settings",
+    "settings": "Settings",
     "reset": "Reset",
-    "textWatermark": "Text Watermark",
+    "textWatermark": "Text",
     "textContent": "Text Content",
     "textPlaceholder": "e.g. © 2026 xMark",
     "fontSize": "Font Size",
@@ -27,20 +27,20 @@
     "bold": "Bold",
     "italic": "Italic",
     "textColor": "Text Color",
-    "logoImage": "Logo / Image",
+    "logoImage": "Logo",
     "changeLogo": "Change Image Logo...",
     "selectLogo": "Select Logo File...",
     "logoScale": "Logo Scale",
-    "appearancePosition": "Appearance & Position",
+    "appearancePosition": "Appearance",
     "opacity": "Opacity",
-    "patternRepeat": "Pattern / Repeat",
+    "patternRepeat": "Repeat",
     "singlePosition": "Single Position",
     "tileRepeat": "Tile Repeat",
-    "positionGrid": "Position (9-Point Grid)",
-    "paddingMargin": "Padding / Margin"
+    "positionGrid": "Position",
+    "paddingMargin": "Padding"
   },
   "preview": {
-    "livePreview": "Live Preview",
+    "livePreview": "Preview",
     "selectImage": "Select an image to preview",
     "selectImageHint": "Add photos from the left panel to begin watermarking"
   },
@@ -54,6 +54,6 @@
     "done": "Done! {{succeeded}}/{{total}} images exported.",
     "processing": "Processing {{current}}/{{total}} ({{currentFile}})",
     "processingShort": "Processing...",
-    "applyExport": "Apply & Export All"
+    "applyExport": "Apply All"
   }
 }
