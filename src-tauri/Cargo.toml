@@ -1,6 +1,6 @@
 [package]
 name = "xmark"
-version = "0.3.2"
+version = "0.4.0"
 description = "Fast, cross-platform image watermarking desktop tool"
 authors = ["bs135"]
 edition = "2021"
