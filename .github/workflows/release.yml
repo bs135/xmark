@@ -65,10 +65,20 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add package.json package-lock.json src-tauri/Cargo.toml src-tauri/tauri.conf.json
-          git commit -m "chore(release): ${NEW_VERSION} [skip ci]"
-          git push origin HEAD:main
-          git tag -a "$NEW_TAG" -m "$NEW_TAG"
-          git push origin "$NEW_TAG"
+
+          if git diff --cached --quiet; then
+            echo "Version files already at ${NEW_VERSION}; skipping bump commit."
+          else
+            git commit -m "chore(release): ${NEW_VERSION} [skip ci]"
+            git push origin HEAD:main
+          fi
+
+          if git ls-remote --exit-code --tags origin "refs/tags/${NEW_TAG}" > /dev/null; then
+            echo "Tag ${NEW_TAG} already exists on origin; skipping tag creation."
+          else
+            git tag -a "$NEW_TAG" -m "$NEW_TAG"
+            git push origin "$NEW_TAG"
+          fi
 
   build-and-release:
     name: Build (${{ matrix.platform }})
