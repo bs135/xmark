@@ -18,9 +18,11 @@
     "@tauri-apps/plugin-store": "^2.4.5",
     "@types/react-window": "^1.8.8",
     "clsx": "^2.1.1",
+    "i18next": "^26.4.2",
     "lucide-react": "^1.47.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-i18next": "^17.0.15",
     "react-window": "^2.3.3",
     "tailwind-merge": "^3.7.0",
     "zustand": "^5.0.15"

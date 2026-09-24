@@ -4,6 +4,7 @@ import { FolderCheck, Play, CheckCircle2, AlertCircle, Loader2 } from 'lucide-re
 import { open } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
+import { useTranslation } from 'react-i18next';
 import type { ProcessBatchRequest, ProcessResult, ProgressPayload } from '../../types/watermark';
 
 export const FooterBar: React.FC = () => {
@@ -17,6 +18,7 @@ export const FooterBar: React.FC = () => {
     progress,
     setProgress,
   } = useAppStore();
+  const { t } = useTranslation();
 
   const [lastResult, setLastResult] = useState<ProcessResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -37,15 +39,15 @@ export const FooterBar: React.FC = () => {
 
   const handleStartProcessing = async () => {
     if (files.length === 0) {
-      setErrorMsg('Please add at least one image to watermark.');
+      setErrorMsg(t('footer.errorNoFiles'));
       return;
     }
     if (!outputDir) {
-      setErrorMsg('Please select an output folder first.');
+      setErrorMsg(t('footer.errorNoOutputDir'));
       return;
     }
     if (!config.useText && !config.useImage) {
-      setErrorMsg('Enable either text or logo watermark in settings.');
+      setErrorMsg(t('footer.errorNoWatermark'));
       return;
     }
 
@@ -75,7 +77,7 @@ export const FooterBar: React.FC = () => {
 
       setLastResult(result);
     } catch (err: any) {
-      setErrorMsg(typeof err === 'string' ? err : err.message || 'Processing failed');
+      setErrorMsg(typeof err === 'string' ? err : err.message || t('footer.errorProcessingFailed'));
     } finally {
       unlisten();
       setIsProcessing(false);
@@ -91,10 +93,10 @@ export const FooterBar: React.FC = () => {
           className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded font-medium transition"
         >
           <FolderCheck className="w-3.5 h-3.5 text-emerald-400" />
-          Choose Output Folder
+          {t('footer.chooseOutputFolder')}
         </button>
         <span className="truncate text-[11px] text-slate-600 dark:text-slate-400 font-mono">
-          {outputDir ? outputDir : 'No output folder chosen yet'}
+          {outputDir ? outputDir : t('footer.noOutputFolder')}
         </span>
       </div>
 
@@ -111,7 +113,7 @@ export const FooterBar: React.FC = () => {
           <div className="flex items-center gap-1.5 text-emerald-400 text-xs">
             <CheckCircle2 className="w-4 h-4" />
             <span>
-              Done! {lastResult.succeeded}/{lastResult.total} images exported.
+              {t('footer.done', { succeeded: lastResult.succeeded, total: lastResult.total })}
             </span>
           </div>
         )}
@@ -120,7 +122,11 @@ export const FooterBar: React.FC = () => {
           <div className="flex items-center gap-2 text-sky-400 text-xs">
             <Loader2 className="w-4 h-4 animate-spin" />
             <span>
-              Processing {progress.current}/{progress.total} ({progress.currentFile})
+              {t('footer.processing', {
+                current: progress.current,
+                total: progress.total,
+                currentFile: progress.currentFile,
+              })}
             </span>
           </div>
         )}
@@ -136,7 +142,7 @@ export const FooterBar: React.FC = () => {
           }`}
         >
           <Play className="w-3.5 h-3.5 fill-current" />
-          {isProcessing ? 'Processing...' : 'Apply & Export All'}
+          {isProcessing ? t('footer.processingShort') : t('footer.applyExport')}
         </button>
       </div>
     </footer>

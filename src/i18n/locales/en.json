@@ -1,0 +1,56 @@
+{
+  "header": {
+    "tagline": "Cross-Platform High-Performance Watermark Tool",
+    "toggleTheme": "Toggle theme",
+    "minimize": "Minimize",
+    "maximize": "Maximize",
+    "close": "Close"
+  },
+  "fileList": {
+    "sourceImages": "Source Images",
+    "clear": "Clear",
+    "clearAllFiles": "Clear all files",
+    "addImages": "Add Images",
+    "addFolder": "Add Folder",
+    "empty": "No images loaded yet.",
+    "emptyHint": "Click buttons above to add photos or folders.",
+    "removeFromList": "Remove from list"
+  },
+  "watermark": {
+    "settings": "Watermark Settings",
+    "reset": "Reset",
+    "textWatermark": "Text Watermark",
+    "textContent": "Text Content",
+    "textPlaceholder": "e.g. © 2026 MyBrand or xmark",
+    "fontSize": "Font Size",
+    "textColor": "Text Color",
+    "logoImage": "Logo / Image",
+    "changeLogo": "Change Image Logo...",
+    "selectLogo": "Select Logo File...",
+    "logoScale": "Logo Scale",
+    "appearancePosition": "Appearance & Position",
+    "opacity": "Opacity",
+    "patternRepeat": "Pattern / Repeat",
+    "singlePosition": "Single Position",
+    "tileRepeat": "Tile Repeat",
+    "positionGrid": "Position (9-Point Grid)",
+    "paddingMargin": "Padding / Margin"
+  },
+  "preview": {
+    "livePreview": "Live Preview",
+    "selectImage": "Select an image to preview",
+    "selectImageHint": "Add photos from the left panel to begin watermarking"
+  },
+  "footer": {
+    "chooseOutputFolder": "Choose Output Folder",
+    "noOutputFolder": "No output folder chosen yet",
+    "errorNoFiles": "Please add at least one image to watermark.",
+    "errorNoOutputDir": "Please select an output folder first.",
+    "errorNoWatermark": "Enable either text or logo watermark in settings.",
+    "errorProcessingFailed": "Processing failed",
+    "done": "Done! {{succeeded}}/{{total}} images exported.",
+    "processing": "Processing {{current}}/{{total}} ({{currentFile}})",
+    "processingShort": "Processing...",
+    "applyExport": "Apply & Export All"
+  }
+}

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Header } from './components/layout/Header';
 import { FooterBar } from './components/layout/FooterBar';
 import { FileListPanel } from './components/file-list/FileListPanel';
@@ -10,6 +11,8 @@ import { loadSettings } from './store/persist';
 function App() {
   const hydrateSettings = useAppStore((s) => s.hydrateSettings);
   const theme = useAppStore((s) => s.theme);
+  const language = useAppStore((s) => s.language);
+  const { i18n } = useTranslation();
 
   useEffect(() => {
     let cancelled = false;
@@ -30,6 +33,10 @@ function App() {
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
+
+  useEffect(() => {
+    void i18n.changeLanguage(language);
+  }, [language, i18n]);
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-50 dark:bg-slate-950 font-sans">

@@ -3,9 +3,11 @@ import { useAppStore } from '../../store/useAppStore';
 import type { Position, RepeatMode } from '../../types/watermark';
 import { Image, Type, Sliders, LayoutGrid } from 'lucide-react';
 import { open } from '@tauri-apps/plugin-dialog';
+import { useTranslation } from 'react-i18next';
 
 export const WatermarkConfigPanel: React.FC = () => {
   const { config, updateConfig, resetConfig } = useAppStore();
+  const { t } = useTranslation();
 
   const handlePickLogo = async () => {
     try {
@@ -43,13 +45,13 @@ export const WatermarkConfigPanel: React.FC = () => {
       <div className="p-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
         <span className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
           <Sliders className="w-4 h-4 text-sky-400" />
-          Watermark Settings
+          {t('watermark.settings')}
         </span>
         <button
           onClick={resetConfig}
           className="text-[11px] text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 underline decoration-slate-600 underline-offset-2 transition"
         >
-          Reset
+          {t('watermark.reset')}
         </button>
       </div>
 
@@ -59,7 +61,7 @@ export const WatermarkConfigPanel: React.FC = () => {
           <div className="flex items-center justify-between">
             <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
               <Type className="w-3.5 h-3.5 text-sky-400" />
-              Text Watermark
+              {t('watermark.textWatermark')}
             </span>
             <input
               type="checkbox"
@@ -73,11 +75,11 @@ export const WatermarkConfigPanel: React.FC = () => {
             <div className="space-y-3 pt-1">
               <div>
                 <label className="text-[11px] text-slate-600 dark:text-slate-400 block mb-1">
-                  Text Content
+                  {t('watermark.textContent')}
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. © 2026 MyBrand or xmark"
+                  placeholder={t('watermark.textPlaceholder') ?? undefined}
                   value={config.text}
                   onChange={(e) => updateConfig({ text: e.target.value })}
                   className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded px-2.5 py-1.5 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500 text-xs"
@@ -88,7 +90,7 @@ export const WatermarkConfigPanel: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-[11px] text-slate-600 dark:text-slate-400">
-                      Font Size (
+                      {t('watermark.fontSize')} (
                       {config.fontSizeUnit === 'percent'
                         ? `${config.fontSizePercent}%`
                         : `${config.fontSize}px`}
@@ -140,7 +142,7 @@ export const WatermarkConfigPanel: React.FC = () => {
 
                 <div>
                   <label className="text-[11px] text-slate-600 dark:text-slate-400 block mb-1">
-                    Text Color
+                    {t('watermark.textColor')}
                   </label>
                   <div className="flex items-center gap-2">
                     <input
@@ -164,7 +166,7 @@ export const WatermarkConfigPanel: React.FC = () => {
           <div className="flex items-center justify-between">
             <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
               <Image className="w-3.5 h-3.5 text-amber-400" />
-              Logo / Image
+              {t('watermark.logoImage')}
             </span>
             <input
               type="checkbox"
@@ -182,7 +184,7 @@ export const WatermarkConfigPanel: React.FC = () => {
                   className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-dashed border-slate-300 dark:border-slate-700 hover:border-slate-500 dark:hover:border-slate-500 rounded text-slate-700 dark:text-slate-300 text-[11px] transition"
                 >
                   <Image className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                  {config.imagePath ? 'Change Image Logo...' : 'Select Logo File...'}
+                  {config.imagePath ? t('watermark.changeLogo') : t('watermark.selectLogo')}
                 </button>
                 {config.imagePath && (
                   <p className="text-[10px] text-slate-600 dark:text-slate-400 truncate mt-1">
@@ -193,7 +195,7 @@ export const WatermarkConfigPanel: React.FC = () => {
 
               <div>
                 <div className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400 mb-1">
-                  <span>Logo Scale</span>
+                  <span>{t('watermark.logoScale')}</span>
                   <span>{Math.round(config.imageScale * 100)}%</span>
                 </div>
                 <input
@@ -211,12 +213,12 @@ export const WatermarkConfigPanel: React.FC = () => {
 
         {/* SECTION 3: COMMON APPEARANCE (OPACITY, POSITION, REPEAT) */}
         <div className="space-y-4 bg-slate-200/40 dark:bg-slate-800/40 p-3 rounded-lg border border-slate-200 dark:border-slate-800">
-          <span className="font-semibold text-slate-700 dark:text-slate-300 block">Appearance & Position</span>
+          <span className="font-semibold text-slate-700 dark:text-slate-300 block">{t('watermark.appearancePosition')}</span>
 
           {/* Opacity */}
           <div>
             <div className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400 mb-1">
-              <span>Opacity (Độ mờ)</span>
+              <span>{t('watermark.opacity')}</span>
               <span>{Math.round(config.opacity * 100)}%</span>
             </div>
             <input
@@ -232,7 +234,7 @@ export const WatermarkConfigPanel: React.FC = () => {
           {/* Repeat Mode */}
           <div>
             <label className="text-[11px] text-slate-600 dark:text-slate-400 block mb-1">
-              Pattern / Repeat
+              {t('watermark.patternRepeat')}
             </label>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -243,7 +245,7 @@ export const WatermarkConfigPanel: React.FC = () => {
                     : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 border border-slate-300 dark:border-slate-700'
                 }`}
               >
-                Single Position
+                {t('watermark.singlePosition')}
               </button>
               <button
                 onClick={() => updateConfig({ repeat: 'tile' as RepeatMode })}
@@ -253,7 +255,7 @@ export const WatermarkConfigPanel: React.FC = () => {
                     : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 border border-slate-300 dark:border-slate-700'
                 }`}
               >
-                Tile Repeat
+                {t('watermark.tileRepeat')}
               </button>
             </div>
           </div>
@@ -263,7 +265,7 @@ export const WatermarkConfigPanel: React.FC = () => {
             <div>
               <label className="text-[11px] text-slate-600 dark:text-slate-400 block mb-1 flex items-center gap-1">
                 <LayoutGrid className="w-3 h-3" />
-                Position (9-Point Grid)
+                {t('watermark.positionGrid')}
               </label>
               <div className="grid grid-cols-3 gap-1.5 w-32 mx-auto p-1.5 bg-slate-50 dark:bg-slate-950 rounded border border-slate-300 dark:border-slate-700">
                 {positions.map((p) => {
@@ -289,7 +291,7 @@ export const WatermarkConfigPanel: React.FC = () => {
           {/* Margin Slider */}
           <div>
             <div className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400 mb-1">
-              <span>Padding / Margin</span>
+              <span>{t('watermark.paddingMargin')}</span>
               <span>{config.margin}px</span>
             </div>
             <input

@@ -1,0 +1,56 @@
+{
+  "header": {
+    "tagline": "Công cụ đóng dấu bản quyền đa nền tảng, hiệu năng cao",
+    "toggleTheme": "Đổi giao diện sáng/tối",
+    "minimize": "Thu nhỏ",
+    "maximize": "Phóng to",
+    "close": "Đóng"
+  },
+  "fileList": {
+    "sourceImages": "Ảnh nguồn",
+    "clear": "Xóa hết",
+    "clearAllFiles": "Xóa tất cả file",
+    "addImages": "Thêm ảnh",
+    "addFolder": "Thêm thư mục",
+    "empty": "Chưa có ảnh nào.",
+    "emptyHint": "Nhấn các nút phía trên để thêm ảnh hoặc thư mục.",
+    "removeFromList": "Xóa khỏi danh sách"
+  },
+  "watermark": {
+    "settings": "Cài đặt Watermark",
+    "reset": "Đặt lại",
+    "textWatermark": "Watermark chữ",
+    "textContent": "Nội dung chữ",
+    "textPlaceholder": "vd. © 2026 MyBrand hoặc xmark",
+    "fontSize": "Kích thước chữ",
+    "textColor": "Màu chữ",
+    "logoImage": "Logo / Hình ảnh",
+    "changeLogo": "Đổi logo...",
+    "selectLogo": "Chọn file logo...",
+    "logoScale": "Tỉ lệ logo",
+    "appearancePosition": "Hiển thị & Vị trí",
+    "opacity": "Độ mờ",
+    "patternRepeat": "Kiểu / Lặp lại",
+    "singlePosition": "Một vị trí",
+    "tileRepeat": "Lặp lại (tile)",
+    "positionGrid": "Vị trí (lưới 9 điểm)",
+    "paddingMargin": "Khoảng cách lề"
+  },
+  "preview": {
+    "livePreview": "Xem trước trực tiếp",
+    "selectImage": "Chọn một ảnh để xem trước",
+    "selectImageHint": "Thêm ảnh từ danh sách bên trái để bắt đầu đóng watermark"
+  },
+  "footer": {
+    "chooseOutputFolder": "Chọn thư mục xuất",
+    "noOutputFolder": "Chưa chọn thư mục xuất",
+    "errorNoFiles": "Vui lòng thêm ít nhất một ảnh để đóng watermark.",
+    "errorNoOutputDir": "Vui lòng chọn thư mục xuất trước.",
+    "errorNoWatermark": "Hãy bật ít nhất một trong hai: watermark chữ hoặc logo.",
+    "errorProcessingFailed": "Xử lý thất bại",
+    "done": "Hoàn tất! Đã xuất {{succeeded}}/{{total}} ảnh.",
+    "processing": "Đang xử lý {{current}}/{{total}} ({{currentFile}})",
+    "processingShort": "Đang xử lý...",
+    "applyExport": "Áp dụng & Xuất tất cả"
+  }
+}

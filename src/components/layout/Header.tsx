@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Layers, Minus, Square, Copy, X, Sun, Moon } from 'lucide-react';
+import { Layers, Minus, Square, Copy, X, Sun, Moon, Languages } from 'lucide-react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { useAppStore } from '../../store/useAppStore';
+import { useTranslation } from 'react-i18next';
+import { useAppStore, type Language } from '../../store/useAppStore';
 
 const appWindow = getCurrentWindow();
 
@@ -9,6 +10,9 @@ export const Header: React.FC = () => {
   const [isMaximized, setIsMaximized] = useState(false);
   const theme = useAppStore((s) => s.theme);
   const setTheme = useAppStore((s) => s.setTheme);
+  const language = useAppStore((s) => s.language);
+  const setLanguage = useAppStore((s) => s.setLanguage);
+  const { t } = useTranslation();
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
@@ -37,37 +41,45 @@ export const Header: React.FC = () => {
           </span>
         </div>
         <span className="text-[11px] text-slate-600 dark:text-slate-400 ml-4 pointer-events-none">
-          Cross-Platform High-Performance Watermark Tool
+          {t('header.tagline')}
         </span>
       </div>
 
       {/* Custom window controls (native title bar is hidden) */}
       <div className="flex items-center h-full">
         <button
+          onClick={() => setLanguage((language === 'en' ? 'vi' : 'en') as Language)}
+          className="h-12 w-11 flex items-center justify-center gap-0.5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 transition text-[10px] font-bold uppercase"
+          aria-label="Toggle language"
+          title={language === 'en' ? 'English' : 'Tiếng Việt'}
+        >
+          <Languages className="w-4 h-4" />
+        </button>
+        <button
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           className="h-12 w-11 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 transition"
-          aria-label="Toggle theme"
+          aria-label={t('header.toggleTheme')}
         >
           {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
         <button
           onClick={() => appWindow.minimize()}
           className="h-12 w-11 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 transition"
-          aria-label="Minimize"
+          aria-label={t('header.minimize')}
         >
           <Minus className="w-4 h-4" />
         </button>
         <button
           onClick={() => appWindow.toggleMaximize()}
           className="h-12 w-11 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 transition"
-          aria-label="Maximize"
+          aria-label={t('header.maximize')}
         >
           {isMaximized ? <Copy className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5" />}
         </button>
         <button
           onClick={() => appWindow.close()}
           className="h-12 w-11 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-rose-600 hover:text-white transition"
-          aria-label="Close"
+          aria-label={t('header.close')}
         >
           <X className="w-4 h-4" />
         </button>

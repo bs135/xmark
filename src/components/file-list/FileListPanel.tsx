@@ -3,11 +3,13 @@ import { useAppStore } from '../../store/useAppStore';
 import { FolderOpen, Plus, Trash2, Image as ImageIcon } from 'lucide-react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
+import { useTranslation } from 'react-i18next';
 import type { ImageFileInfo } from '../../types/watermark';
 
 export const FileListPanel: React.FC = () => {
   const { files, selectedFileIndex, setSelectedFileIndex, addFiles, removeFile, clearFiles } =
     useAppStore();
+  const { t } = useTranslation();
 
   const handleSelectFiles = async () => {
     try {
@@ -64,16 +66,16 @@ export const FileListPanel: React.FC = () => {
       <div className="p-3 border-b border-slate-200 dark:border-slate-800 flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-            Source Images ({files.length})
+            {t('fileList.sourceImages')} ({files.length})
           </span>
           {files.length > 0 && (
             <button
               onClick={clearFiles}
-              title="Clear all files"
+              title={t('fileList.clearAllFiles') ?? undefined}
               className="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1 transition"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              Clear
+              {t('fileList.clear')}
             </button>
           )}
         </div>
@@ -84,14 +86,14 @@ export const FileListPanel: React.FC = () => {
             className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 rounded border border-slate-300 dark:border-slate-700 shadow-sm transition"
           >
             <Plus className="w-3.5 h-3.5 text-sky-400" />
-            Add Images
+            {t('fileList.addImages')}
           </button>
           <button
             onClick={handleSelectDirectory}
             className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 rounded border border-slate-300 dark:border-slate-700 shadow-sm transition"
           >
             <FolderOpen className="w-3.5 h-3.5 text-amber-400" />
-            Add Folder
+            {t('fileList.addFolder')}
           </button>
         </div>
       </div>
@@ -101,9 +103,9 @@ export const FileListPanel: React.FC = () => {
         {files.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center p-4 text-slate-500 dark:text-slate-500">
             <ImageIcon className="w-10 h-10 mb-2 stroke-1 text-slate-400 dark:text-slate-600" />
-            <p className="text-xs">No images loaded yet.</p>
+            <p className="text-xs">{t('fileList.empty')}</p>
             <p className="text-[11px] text-slate-400 dark:text-slate-600 mt-1">
-              Click buttons above to add photos or folders.
+              {t('fileList.emptyHint')}
             </p>
           </div>
         ) : (
@@ -138,7 +140,7 @@ export const FileListPanel: React.FC = () => {
                     removeFile(idx);
                   }}
                   className="opacity-0 group-hover:opacity-100 text-slate-500 dark:text-slate-500 hover:text-rose-400 p-1 transition"
-                  title="Remove from list"
+                  title={t('fileList.removeFromList') ?? undefined}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
