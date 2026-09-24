@@ -1,71 +1,148 @@
-# `xmark` - Cross-Platform Image Watermark Tool
+# xMark — Cross-Platform Image Watermark Tool
 
-`xmark` là ứng dụng desktop chạy đa nền tảng (Windows, macOS, Linux) hỗ trợ đóng dấu bản quyền (watermark hình ảnh logo hoặc văn bản) lên hàng loạt ảnh với hiệu năng cao nhờ Rust và giao diện trực quan bằng React + Tailwind CSS.
+[![Release](https://github.com/bs135/xmark/actions/workflows/release.yml/badge.svg)](https://github.com/bs135/xmark/actions/workflows/release.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
----
+**xMark** is a fast, cross-platform desktop application for batch watermarking images with a logo, text, or both. It combines a Rust backend (via [Tauri](https://tauri.app)) for high-performance image processing with a React + Tailwind CSS frontend for an intuitive user experience.
 
-## 🚀 Hướng dẫn chạy ứng dụng
-
-### 1. Yêu cầu môi trường (Prerequisites)
-- **Node.js**: Phiên bản 18+ (đã có sẵn trên máy của bạn: `v24.18.0`).
-- **Rust & Cargo**: Phiên bản 1.77+ (đã có sẵn trên máy của bạn: `1.90.0`).
-- **C++ Build Tools**: Đã cài đặt qua Visual Studio (workload *Desktop development with C++*).
-- **WebView2 Runtime**: Có sẵn mặc định trên Windows 10/11.
+Supported platforms: **Windows**, **macOS** (Apple Silicon & Intel), and **Linux**.
 
 ---
 
-### 2. Chế độ Phát triển (Development Mode)
+## Table of Contents
 
-Chạy lệnh sau trong PowerShell tại thư mục dự án:
+- [Features](#features)
+- [Download](#download)
+- [Prerequisites](#prerequisites)
+  - [Windows](#windows)
+  - [macOS](#macos)
+  - [Linux (Ubuntu/Debian)](#linux-ubuntudebian)
+- [Development](#development)
+- [Building for Production](#building-for-production)
+- [Usage Guide](#usage-guide)
+- [Contributing](#contributing)
+- [License](#license)
 
-```powershell
+---
+
+## Features
+
+- Batch watermarking of `.png`, `.jpg`, `.jpeg`, `.webp`, and `.bmp` images.
+- Text watermarks with configurable font family, size (pixel or percentage-based), color, bold, and italic styles.
+- Logo/image watermarks with adjustable scale.
+- Adjustable opacity, padding, and placement (single position on a 9-point grid, or repeating tile pattern).
+- Live, real-time canvas preview before exporting.
+- High-throughput, multi-threaded batch export powered by Rust and [Rayon](https://github.com/rayon-rs/rayon).
+- Persisted settings (output folder, watermark configuration, theme, language) across sessions.
+- Dark/light theme and English/Vietnamese localization.
+
+## Download
+
+Prebuilt installers for every release are published on the [GitHub Releases](https://github.com/bs135/xmark/releases) page:
+
+- **Windows**: `.msi` or `.exe` (NSIS) installer.
+- **macOS**: `.dmg` disk image (separate builds for Apple Silicon and Intel).
+- **Linux**: `.deb`, `.rpm`, or `.AppImage`.
+
+To try an in-progress branch build, trigger the **Build Artifacts (manual)** workflow from the [Actions](https://github.com/bs135/xmark/actions) tab and download the resulting artifact.
+
+---
+
+## Prerequisites
+
+xMark is built with [Tauri v2](https://tauri.app), which requires Node.js, Rust, and a platform-specific WebView toolchain.
+
+### Windows
+
+| Requirement | How to install |
+|---|---|
+| Node.js 18+ | `winget install OpenJS.NodeJS.LTS` or download from [nodejs.org](https://nodejs.org/) |
+| Rust & Cargo 1.77+ | `winget install Rustlang.Rustup` or via [rustup.rs](https://rustup.rs/) |
+| Microsoft C++ Build Tools | Install [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with the **Desktop development with C++** workload |
+| WebView2 Runtime | Preinstalled on Windows 10/11; if missing, download from [Microsoft's WebView2 page](https://developer.microsoft.com/microsoft-edge/webview2/) |
+
+### macOS
+
+| Requirement | How to install |
+|---|---|
+| Xcode Command Line Tools | `xcode-select --install` |
+| Rust & Cargo 1.77+ | `brew install rustup-init && rustup-init` or via [rustup.rs](https://rustup.rs/) |
+| Node.js 18+ | `brew install node` |
+
+### Linux (Ubuntu/Debian)
+
+| Requirement | How to install |
+|---|---|
+| System libraries for Tauri | `sudo apt update && sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev` |
+| Rust & Cargo 1.77+ | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` (see [rustup.rs](https://rustup.rs/)) |
+| Node.js 18+ | `sudo apt install nodejs npm`, or use [nvm](https://github.com/nvm-sh/nvm) for a specific version |
+
+> For other distributions (Fedora, Arch, etc.), see the official [Tauri Linux prerequisites](https://v2.tauri.app/start/prerequisites/#linux) for the equivalent system packages.
+
+---
+
+## Development
+
+Install dependencies and start the app in development mode with hot-reloading:
+
+```bash
+npm install
 npm run tauri dev
 ```
 
-*Lệnh này sẽ:*
-1. Khởi chạy Vite dev server tại cổng `5173` (hỗ trợ Hot Module Replacement - HMR).
-2. Tự động biên dịch mã nguồn Rust backend.
-3. Khởi chạy cửa sổ ứng dụng desktop `xmark`.
+This will:
+1. Start the Vite dev server on port `5173` (with Hot Module Replacement).
+2. Compile the Rust backend.
+3. Launch the xMark desktop window.
 
----
+## Building for Production
 
-### 3. Đóng gói bản cài đặt (Build Production)
+To produce a native installer for your platform:
 
-Khi muốn đóng gói thành file cài đặt `.exe` / `.msi`:
-
-```powershell
+```bash
 npm run tauri build
 ```
 
-File cài đặt hoàn chỉnh sẽ nằm ở:
+The resulting bundle will be located under:
+
 ```text
-src-tauri\target\release\bundle\msi\
-hoặc
-src-tauri\target\release\bundle\nsis\
+src-tauri/target/release/bundle/
 ```
+
+(e.g. `msi/` or `nsis/` on Windows, `dmg/` on macOS, `deb/`, `rpm/`, or `appimage/` on Linux)
 
 ---
 
-## 🛠️ Hướng dẫn sử dụng các tính năng
+## Usage Guide
 
-1. **Thêm ảnh nguồn (Cột bên trái)**:
-   - Nhấn **Add Images** để chọn một hoặc nhiều file ảnh lẻ.
-   - Nhấn **Add Folder** để chọn thư mục; chương trình sẽ tự động quét các file định dạng `.png`, `.jpg`, `.jpeg`, `.webp`, `.bmp`.
-   - Bấm vào từng ảnh trong danh sách để xem trước hoặc bấm biểu tượng thùng rác để xóa ảnh khỏi danh sách.
+1. **Add source images (left panel)**
+   - Click **Add Images** to select one or more individual image files.
+   - Click **Add Folder** to select a directory; xMark automatically scans for `.png`, `.jpg`, `.jpeg`, `.webp`, and `.bmp` files.
+   - Click an image in the list to preview it, or the trash icon to remove it from the list.
 
-2. **Cấu hình Watermark (Cột bên phải)**:
-   - **Text Watermark**: Tích bật ô chọn, nhập nội dung chữ, chỉnh cỡ chữ (font size) và chọn màu chữ.
-   - **Logo / Image**: Tích bật ô chọn, bấm chọn file logo từ máy tính và kéo thanh trượt chỉnh kích thước (scale).
-   - **Opacity (Độ mờ)**: Điều chỉnh từ 5% đến 100% (mặc định 50%).
-   - **Repeat (Mẫu lặp)**:
-     - *Single Position*: Đóng dấu tại 1 vị trí cố định theo lưới 9 điểm (Góc trên-trái, giữa, góc dưới-phải,...).
-     - *Tile Repeat*: Lặp lại watermark đều khắp toàn bộ ảnh dạng lưới chống sao chép trái phép.
-   - **Padding / Margin**: Tùy chỉnh khoảng cách viền.
+2. **Configure the watermark (right panel)**
+   - **Text Watermark**: enable the checkbox, enter text content, adjust font size and color.
+   - **Logo/Image**: enable the checkbox, choose a logo file, and drag the slider to adjust scale.
+   - **Opacity**: adjust from 5% to 100% (default 50%).
+   - **Repeat**:
+     - *Single Position*: stamp the watermark at one fixed position on a 9-point grid (top-left, center, bottom-right, etc.).
+     - *Tile Repeat*: repeat the watermark evenly across the entire image as an anti-copy grid pattern.
+   - **Padding/Margin**: fine-tune the distance from the edges.
 
-3. **Live Preview (Khung ở giữa)**:
-   - Hiển thị kết quả watermark thời gian thực trên Canvas trước khi quyết định xuất file.
+3. **Live Preview (center panel)**
+   - See a real-time watermark preview on canvas before exporting.
 
-4. **Xuất file hàng loạt (Thanh Footer phía dưới)**:
-   - Nhấn **Choose Output Folder** để chọn thư mục lưu ảnh mới.
-   - Nhấn **Apply & Export All** để bắt đầu xử lý đa luồng siêu tốc bằng Rayon trong Rust.
-   - Theo dõi tiến độ xử lý và thông báo hoàn thành trên thanh trạng thái.
+4. **Batch export (footer bar)**
+   - Click **Choose Output Folder** to select where processed images will be saved.
+   - Click **Apply & Export All** to start high-speed, multi-threaded processing powered by Rayon in Rust.
+   - Track progress and completion status in the status bar.
+
+---
+
+## Contributing
+
+Issues and pull requests are welcome. Please follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages, as releases are automated based on them.
+
+## License
+
+xMark is released under the [MIT License](LICENSE).
