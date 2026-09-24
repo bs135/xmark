@@ -74,6 +74,8 @@ jobs:
     name: Build (${{ matrix.platform }})
     needs: tag-release
     if: needs.tag-release.outputs.released == 'true'
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
