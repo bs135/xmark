@@ -55,5 +55,26 @@
     "processing": "Processing {{current}}/{{total}} ({{currentFile}})",
     "processingShort": "Processing...",
     "applyExport": "Apply All"
+  },
+  "about": {
+    "title": "About xMark",
+    "tagline": "Fast, cross-platform image watermarking desktop tool",
+    "version": "Version {{version}}",
+    "author": "Author",
+    "license": "License",
+    "sourceCode": "Source Code",
+    "checkForUpdates": "Check for Updates",
+    "checking": "Checking...",
+    "upToDate": "You're up to date.",
+    "updateAvailable": "New version {{version}} is available.",
+    "viewRelease": "View Release",
+    "checkFailed": "Couldn't check for updates. Please try again later.",
+    "close": "Close",
+    "openInfo": "About"
+  },
+  "update": {
+    "newVersionAvailable": "A new version ({{version}}) of xMark is available.",
+    "viewDetails": "View Details",
+    "dismiss": "Dismiss"
   }
 }

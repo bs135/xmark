@@ -55,5 +55,26 @@
     "processing": "Đang xử lý {{current}}/{{total}} ({{currentFile}})",
     "processingShort": "Đang xử lý...",
     "applyExport": "Áp dụng tất cả"
+  },
+  "about": {
+    "title": "Về xMark",
+    "tagline": "Công cụ đóng dấu bản quyền ảnh đa nền tảng, hiệu năng cao",
+    "version": "Phiên bản {{version}}",
+    "author": "Tác giả",
+    "license": "Giấy phép",
+    "sourceCode": "Mã nguồn",
+    "checkForUpdates": "Kiểm tra cập nhật",
+    "checking": "Đang kiểm tra...",
+    "upToDate": "Bạn đang dùng phiên bản mới nhất.",
+    "updateAvailable": "Đã có phiên bản mới {{version}}.",
+    "viewRelease": "Xem bản phát hành",
+    "checkFailed": "Không thể kiểm tra cập nhật. Vui lòng thử lại sau.",
+    "close": "Đóng",
+    "openInfo": "Giới thiệu"
+  },
+  "update": {
+    "newVersionAvailable": "Đã có phiên bản mới ({{version}}) của xMark.",
+    "viewDetails": "Xem chi tiết",
+    "dismiss": "Bỏ qua"
   }
 }
