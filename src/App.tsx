@@ -9,20 +9,30 @@ import { loadSettings } from './store/persist';
 
 function App() {
   const hydrateSettings = useAppStore((s) => s.hydrateSettings);
+  const theme = useAppStore((s) => s.theme);
 
   useEffect(() => {
     let cancelled = false;
     loadSettings().then((settings) => {
       if (cancelled) return;
-      hydrateSettings({ outputDir: settings.outputDir, config: settings.config });
+      hydrateSettings({
+        outputDir: settings.outputDir,
+        config: settings.config,
+        theme: settings.theme,
+        language: settings.language,
+      });
     });
     return () => {
       cancelled = true;
     };
   }, [hydrateSettings]);
 
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
+
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-950 font-sans">
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-50 dark:bg-slate-950 font-sans">
       <Header />
       
       {/* 3-Column Studio Layout */}

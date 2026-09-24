@@ -2,6 +2,9 @@ import { create } from 'zustand';
 import type { ImageFileInfo, WatermarkConfig } from '../types/watermark';
 import { saveSettings } from './persist';
 
+export type Theme = 'dark' | 'light';
+export type Language = 'en' | 'vi';
+
 interface AppState {
   // Files
   files: ImageFileInfo[];
@@ -19,9 +22,20 @@ interface AppState {
   updateConfig: (patch: Partial<WatermarkConfig>) => void;
   resetConfig: () => void;
 
+  // UI preferences
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  language: Language;
+  setLanguage: (language: Language) => void;
+
   // Settings loaded from persisted store (avoids re-saving on initial hydrate)
   hydrated: boolean;
-  hydrateSettings: (settings: { outputDir?: string; config?: Partial<WatermarkConfig> }) => void;
+  hydrateSettings: (settings: {
+    outputDir?: string;
+    config?: Partial<WatermarkConfig>;
+    theme?: Theme;
+    language?: Language;
+  }) => void;
 
   // Processing state
   isProcessing: boolean;
@@ -48,7 +62,12 @@ const defaultConfig: WatermarkConfig = {
 };
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
-function scheduleSave(patch: { outputDir?: string; config?: WatermarkConfig }) {
+function scheduleSave(patch: {
+  outputDir?: string;
+  config?: WatermarkConfig;
+  theme?: Theme;
+  language?: Language;
+}) {
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     void saveSettings(patch);
@@ -92,11 +111,24 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (get().hydrated) scheduleSave({ config: defaultConfig });
   },
 
+  theme: 'dark',
+  setTheme: (theme) => {
+    set({ theme });
+    if (get().hydrated) scheduleSave({ theme });
+  },
+  language: 'en',
+  setLanguage: (language) => {
+    set({ language });
+    if (get().hydrated) scheduleSave({ language });
+  },
+
   hydrated: false,
   hydrateSettings: (settings) =>
     set((state) => ({
       outputDir: settings.outputDir ?? state.outputDir,
       config: settings.config ? { ...state.config, ...settings.config } : state.config,
+      theme: settings.theme ?? state.theme,
+      language: settings.language ?? state.language,
       hydrated: true,
     })),
 
