@@ -1,10 +1,26 @@
+import { useEffect } from 'react';
 import { Header } from './components/layout/Header';
 import { FooterBar } from './components/layout/FooterBar';
 import { FileListPanel } from './components/file-list/FileListPanel';
 import { WatermarkConfigPanel } from './components/watermark/WatermarkConfigPanel';
 import { LivePreview } from './components/preview/LivePreview';
+import { useAppStore } from './store/useAppStore';
+import { loadSettings } from './store/persist';
 
 function App() {
+  const hydrateSettings = useAppStore((s) => s.hydrateSettings);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadSettings().then((settings) => {
+      if (cancelled) return;
+      hydrateSettings({ outputDir: settings.outputDir, config: settings.config });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [hydrateSettings]);
+
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-950 font-sans">
       <Header />
