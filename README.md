@@ -5,7 +5,7 @@
 
 **xMark** is a fast, cross-platform desktop application for batch watermarking images with a logo, text, or both. It combines a Rust backend (via [Tauri](https://tauri.app)) for high-performance image processing with a React + Tailwind CSS frontend for an intuitive user experience.
 
-Supported platforms: **Windows**, **macOS** (Apple Silicon & Intel), and **Linux**.
+Supported platforms: **Windows**, **macOS** (Apple Silicon), and **Linux**.
 
 ---
 
@@ -40,11 +40,13 @@ Supported platforms: **Windows**, **macOS** (Apple Silicon & Intel), and **Linux
 
 Prebuilt installers for every release are published on the [GitHub Releases](https://github.com/bs135/xmark/releases) page:
 
-- **Windows**: `.msi` or `.exe` (NSIS) installer.
-- **macOS**: `.dmg` disk image (separate builds for Apple Silicon and Intel).
-- **Linux**: `.deb`, `.rpm`, or `.AppImage`.
+- **Windows**: `xMark_<version>_windows_x64-setup.exe` (NSIS) or `xMark_<version>_windows_x64.msi` (WiX).
+- **macOS**: `xMark_<version>_darwin_aarch64.dmg` (Apple Silicon M1/M2/M3).
+- **Linux**: `xMark_<version>_linux_amd64.deb`, `xMark_<version>_linux_amd64.AppImage`, or `xMark_<version>_linux_x86_64.rpm`.
 
-To try an in-progress branch build, trigger the **Build Artifacts (manual)** workflow from the [Actions](https://github.com/bs135/xmark/actions) tab and download the resulting artifact.
+Release assets are formatted with platform and architecture identifiers (`[name]_[version]_[platform]_[arch][setup][ext]`).
+
+To try an in-progress branch build, trigger the **Release** workflow via `workflow_dispatch` from the [Actions](https://github.com/bs135/xmark/actions) tab and download the resulting artifacts.
 
 ---
 
