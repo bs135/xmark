@@ -37,7 +37,7 @@ export const Header: React.FC = () => {
         <div className="flex items-baseline gap-1.5 pointer-events-none">
           <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white m-0">xMark</h1>
           <span className="text-[10px] text-sky-400 font-semibold px-1.5 py-0.2 bg-sky-950 border border-sky-800 rounded">
-            v0.3.0
+            v{__APP_VERSION__}
           </span>
         </div>
         <span className="text-[11px] text-slate-600 dark:text-slate-400 ml-4 pointer-events-none">
