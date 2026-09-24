@@ -23,6 +23,7 @@ Supported platforms: **Windows**, **macOS** (Apple Silicon), and **Linux**.
 - [Building for Production](#building-for-production)
 - [Usage Guide](#usage-guide)
 - [Contributing](#contributing)
+- [Acknowledgements](#acknowledgements)
 - [License](#license)
 
 ---
@@ -146,6 +147,10 @@ src-tauri/target/release/bundle/
 ## Contributing
 
 Issues and pull requests are welcome. Please follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages, as releases are automated based on them.
+
+## Acknowledgements
+
+This project was developed with the assistance of AI.
 
 ## License
 
