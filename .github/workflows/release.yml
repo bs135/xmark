@@ -1,4 +1,7 @@
 name: Release
+# Requires repository setting "Settings > Actions > General > Workflow permissions"
+# set to "Read and write permissions" so the tag-release job can push the
+# version-bump commit and tag back to `main`.
 
 on:
   push:
@@ -26,13 +29,46 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Bump version and push tag
+      - name: Determine next version
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: patch
           release_branches: main
+          dry_run: true
+
+      - name: Setup Node.js
+        if: steps.tag_version.outputs.new_tag != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Bump version in project files
+        if: steps.tag_version.outputs.new_tag != ''
+        env:
+          NEW_VERSION: ${{ steps.tag_version.outputs.new_version }}
+        run: |
+          set -euo pipefail
+          npm version "$NEW_VERSION" --no-git-tag-version --allow-same-version
+          sed -i "s/^version = \".*\"/version = \"${NEW_VERSION}\"/" src-tauri/Cargo.toml
+          jq --arg v "$NEW_VERSION" '.version = $v' src-tauri/tauri.conf.json > /tmp/tauri.conf.json
+          mv /tmp/tauri.conf.json src-tauri/tauri.conf.json
+
+      - name: Commit version bump and push tag
+        if: steps.tag_version.outputs.new_tag != ''
+        env:
+          NEW_TAG: ${{ steps.tag_version.outputs.new_tag }}
+          NEW_VERSION: ${{ steps.tag_version.outputs.new_version }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json src-tauri/Cargo.toml src-tauri/tauri.conf.json
+          git commit -m "chore(release): ${NEW_VERSION} [skip ci]"
+          git push origin HEAD:main
+          git tag -a "$NEW_TAG" -m "$NEW_TAG"
+          git push origin "$NEW_TAG"
 
   build-and-release:
     name: Build (${{ matrix.platform }})
