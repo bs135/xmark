@@ -14,6 +14,7 @@ Supported platforms: **Windows**, **macOS** (Apple Silicon), and **Linux**.
 ## Table of Contents
 
 - [Features](#features)
+- [Tech Stack](#tech-stack)
 - [Download](#download)
 - [Prerequisites](#prerequisites)
   - [Windows](#windows)
@@ -23,6 +24,7 @@ Supported platforms: **Windows**, **macOS** (Apple Silicon), and **Linux**.
 - [Building for Production](#building-for-production)
 - [Usage Guide](#usage-guide)
 - [Contributing](#contributing)
+- [Acknowledgements](#acknowledgements)
 - [License](#license)
 
 ---
@@ -37,6 +39,25 @@ Supported platforms: **Windows**, **macOS** (Apple Silicon), and **Linux**.
 - High-throughput, multi-threaded batch export powered by Rust and [Rayon](https://github.com/rayon-rs/rayon).
 - Persisted settings (output folder, watermark configuration, theme, language) across sessions.
 - Dark/light theme and English/Vietnamese localization.
+
+## Tech Stack
+
+- **Desktop Framework**: [Tauri v2](https://tauri.app)
+- **Backend (Rust)**:
+  - **Image Processing**: [`image`](https://crates.io/crates/image), [`imageproc`](https://crates.io/crates/imageproc)
+  - **Typography & Font Rendering**: [`ab_glyph`](https://crates.io/crates/ab_glyph)
+  - **Parallelism**: [`rayon`](https://crates.io/crates/rayon) for multi-threaded batch exports
+- **Frontend (Web)**:
+  - **Framework & Language**: [React 19](https://react.dev) + [TypeScript](https://www.typescriptlang.org)
+  - **Build Tool**: [Vite](https://vitejs.dev)
+  - **Styling**: [Tailwind CSS](https://tailwindcss.com)
+  - **State Management**: [Zustand](https://github.com/pmndrs/zustand)
+  - **Localization**: [i18next](https://www.i18next.com) & [react-i18next](https://react.i18next.com)
+  - **Virtualization**: [react-window](https://github.com/bvaughn/react-window)
+  - **Icons**: [Lucide React](https://lucide.dev)
+- **Packaging & CI/CD**:
+  - Windows (NSIS `.exe`, WiX `.msi`), macOS (`.dmg`), Linux (`.deb`, `.rpm`, `.AppImage`)
+  - Automated multi-platform releases via GitHub Actions
 
 ## Download
 
@@ -146,6 +167,10 @@ src-tauri/target/release/bundle/
 ## Contributing
 
 Issues and pull requests are welcome. Please follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages, as releases are automated based on them.
+
+## Acknowledgements
+
+This project was developed with the assistance of AI.
 
 ## License
 
