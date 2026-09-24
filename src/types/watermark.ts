@@ -30,6 +30,8 @@ export interface WatermarkConfig {
   text: string;
   useText: boolean;
   fontSize: number;
+  fontSizeUnit: 'px' | 'percent';
+  fontSizePercent: number; // 1 to 20 (% of base image width)
   textColor: string; // hex "#ffffff"
 
   // Common properties

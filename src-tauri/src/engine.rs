@@ -1,6 +1,6 @@
-use ab_glyph::{Font, FontRef, PxScale};
+use ab_glyph::{FontRef, PxScale};
 use image::{imageops, ImageBuffer, Rgba, RgbaImage};
-use imageproc::drawing::draw_text_mut;
+use imageproc::drawing::{draw_text_mut, text_size};
 use std::fs;
 use std::path::Path;
 
@@ -30,6 +30,58 @@ pub fn parse_hex_color(hex: &str, alpha: f32) -> Rgba<u8> {
     Rgba([r, g, b, a])
 }
 
+/// Trim fully-transparent margins from a rendered RGBA image so that the
+/// returned bounding box matches the *visible* glyph pixels exactly. This is
+/// what keeps the watermark visually centered: without this, imprecise text
+/// metrics leave uneven blank space around the glyphs, and that leftover
+/// space then skews the "centered" position of the whole overlay.
+fn trim_transparent(img: &RgbaImage) -> Option<RgbaImage> {
+    let (w, h) = img.dimensions();
+    if w == 0 || h == 0 {
+        return None;
+    }
+
+    let mut min_x = w;
+    let mut min_y = h;
+    let mut max_x = 0u32;
+    let mut max_y = 0u32;
+    let mut found = false;
+
+    for y in 0..h {
+        for x in 0..w {
+            let a = img.get_pixel(x, y)[3];
+            if a > 0 {
+                found = true;
+                if x < min_x {
+                    min_x = x;
+                }
+                if x > max_x {
+                    max_x = x;
+                }
+                if y < min_y {
+                    min_y = y;
+                }
+                if y > max_y {
+                    max_y = y;
+                }
+            }
+        }
+    }
+
+    if !found {
+        return None;
+    }
+
+    // Small symmetric padding to avoid clipping anti-aliased edges.
+    let pad = 2i64;
+    let crop_x = (min_x as i64 - pad).max(0) as u32;
+    let crop_y = (min_y as i64 - pad).max(0) as u32;
+    let crop_w = ((max_x as i64 + pad + 1).min(w as i64) - crop_x as i64).max(1) as u32;
+    let crop_h = ((max_y as i64 + pad + 1).min(h as i64) - crop_y as i64).max(1) as u32;
+
+    Some(imageops::crop_imm(img, crop_x, crop_y, crop_w, crop_h).to_image())
+}
+
 pub fn render_text_as_image(
     text: &str,
     font_size: f32,
@@ -43,18 +95,47 @@ pub fn render_text_as_image(
     let font = FontRef::try_from_slice(DEFAULT_FONT_DATA).ok()?;
     let scale = PxScale::from(font_size);
 
-    // Calculate approximate text bounding box
-    let _v_metrics = font.as_scaled(scale);
-    let h_advance = font_size * 0.6 * (text.chars().count() as f32);
-    let width = (h_advance.ceil() as u32).max(10) + 20;
-    let height = (font_size * 1.4).ceil() as u32;
+    // Accurately measure the text using real glyph metrics instead of a
+    // crude character-count heuristic, then draw onto a padded canvas and
+    // trim to the exact visible bounds. This ensures the returned overlay
+    // image has no hidden blank space that would otherwise shift the
+    // watermark off-center when it gets positioned later.
+    let (measured_w, measured_h) = text_size(scale, &font, text);
+    let padding = (font_size * 0.5).ceil().max(8.0) as u32;
+    let width = measured_w.max(1) + padding * 2;
+    let height = measured_h.max(1) + padding * 2;
 
     let mut img: RgbaImage = ImageBuffer::new(width, height);
     let color = parse_hex_color(color_hex, opacity);
 
-    draw_text_mut(&mut img, color, 10, 5, scale, &font, text);
+    draw_text_mut(&mut img, color, padding as i32, padding as i32, scale, &font, text);
 
-    Some(img)
+    trim_transparent(&img)
+}
+
+/// Render text to an image sized as a percentage of the base image's width,
+/// preserving legibility by measuring at a high base font size first, then
+/// resizing (similar to how the logo watermark is scaled).
+pub fn render_text_as_percent_image(
+    text: &str,
+    target_base_w: u32,
+    percent: f32,
+    color_hex: &str,
+    opacity: f32,
+) -> Option<RgbaImage> {
+    const BASE_FONT_SIZE: f32 = 120.0;
+    let source = render_text_as_image(text, BASE_FONT_SIZE, color_hex, opacity)?;
+    let (src_w, src_h) = source.dimensions();
+    if src_w == 0 || src_h == 0 {
+        return None;
+    }
+
+    let desired_w = ((target_base_w as f32) * (percent.clamp(0.5, 50.0) / 100.0))
+        .max(4.0) as u32;
+    let aspect = src_h as f32 / src_w as f32;
+    let desired_h = ((desired_w as f32) * aspect).max(4.0) as u32;
+
+    Some(imageops::resize(&source, desired_w, desired_h, imageops::FilterType::Lanczos3))
 }
 
 pub fn prepare_image_watermark(path: &str, target_w: u32, _target_h: u32, scale_ratio: f32, opacity: f32) -> Option<RgbaImage> {
@@ -143,6 +224,64 @@ pub fn apply_watermark(base: &mut RgbaImage, overlay: &RgbaImage, config: &Water
     }
 }
 
+/// Vertical gap (in pixels) kept between the logo and the text watermark
+/// when both are enabled, so they never visually overlap.
+const STACK_SPACING_PX: i64 = 12;
+
+/// Draws the logo watermark stacked directly above the text watermark
+/// (rather than both anchored independently, which could overlap). Both
+/// single-position and tile-repeat modes are supported.
+pub fn apply_stacked_watermark(
+    base: &mut RgbaImage,
+    logo: &RgbaImage,
+    text: &RgbaImage,
+    config: &WatermarkConfig,
+) {
+    let (bw, bh) = base.dimensions();
+    let (lw, lh) = logo.dimensions();
+    let (tw, th) = text.dimensions();
+
+    if bw == 0 || bh == 0 || lw == 0 || lh == 0 || tw == 0 || th == 0 {
+        return;
+    }
+
+    let combined_w = lw.max(tw);
+    let combined_h = lh + STACK_SPACING_PX.max(0) as u32 + th;
+
+    let draw_unit = |base: &mut RgbaImage, unit_x: i64, unit_y: i64| {
+        let logo_x = unit_x + ((combined_w - lw) / 2) as i64;
+        let logo_y = unit_y;
+        let text_x = unit_x + ((combined_w - tw) / 2) as i64;
+        let text_y = unit_y + lh as i64 + STACK_SPACING_PX;
+        imageops::overlay(base, logo, logo_x, logo_y);
+        imageops::overlay(base, text, text_x, text_y);
+    };
+
+    match config.repeat {
+        RepeatMode::None => {
+            let (x, y) = calculate_position(bw, bh, combined_w, combined_h, &config.position, config.margin);
+            draw_unit(base, x, y);
+        }
+        RepeatMode::Tile => {
+            let step_x = (combined_w as i64) + ((config.margin * 2) as i64).max(30);
+            let step_y = (combined_h as i64) + ((config.margin * 2) as i64).max(30);
+
+            let mut y: i64 = 10;
+            let mut row = 0;
+            while y < bh as i64 {
+                let offset_x = if row % 2 == 1 { step_x / 2 } else { 0 };
+                let mut x: i64 = offset_x - step_x;
+                while x < bw as i64 {
+                    draw_unit(base, x, y);
+                    x += step_x;
+                }
+                y += step_y;
+                row += 1;
+            }
+        }
+    }
+}
+
 pub fn process_single_image(
     input_path: &Path,
     output_path: &Path,
@@ -152,25 +291,42 @@ pub fn process_single_image(
     let mut rgba_img = dynamic_img.to_rgba8();
     let (bw, bh) = rgba_img.dimensions();
 
-    // 1. Process Logo watermark if enabled
-    if config.use_image {
-        if let Some(ref img_path) = config.image_path {
-            if let Some(overlay) = prepare_image_watermark(img_path, bw, bh, config.image_scale, config.opacity) {
-                apply_watermark(&mut rgba_img, &overlay, config);
-            }
-        }
-    }
+    let logo_overlay = if config.use_image {
+        config
+            .image_path
+            .as_ref()
+            .and_then(|img_path| prepare_image_watermark(img_path, bw, bh, config.image_scale, config.opacity))
+    } else {
+        None
+    };
 
-    // 2. Process Text watermark if enabled
-    if config.use_text && !config.text.trim().is_empty() {
-        if let Some(text_overlay) = render_text_as_image(
-            &config.text,
-            config.font_size,
-            &config.text_color,
-            config.opacity,
-        ) {
-            apply_watermark(&mut rgba_img, &text_overlay, config);
+    let text_overlay = if config.use_text && !config.text.trim().is_empty() {
+        if config.font_size_unit == "percent" {
+            render_text_as_percent_image(
+                &config.text,
+                bw,
+                config.font_size_percent,
+                &config.text_color,
+                config.opacity,
+            )
+        } else {
+            render_text_as_image(&config.text, config.font_size, &config.text_color, config.opacity)
         }
+    } else {
+        None
+    };
+
+    match (&logo_overlay, &text_overlay) {
+        (Some(logo), Some(text)) => {
+            apply_stacked_watermark(&mut rgba_img, logo, text, config);
+        }
+        (Some(logo), None) => {
+            apply_watermark(&mut rgba_img, logo, config);
+        }
+        (None, Some(text)) => {
+            apply_watermark(&mut rgba_img, text, config);
+        }
+        (None, None) => {}
     }
 
     // Ensure parent dir exists

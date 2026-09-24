@@ -37,6 +37,8 @@ const defaultConfig: WatermarkConfig = {
   text: '',
   useText: true,
   fontSize: 36,
+  fontSizeUnit: 'px',
+  fontSizePercent: 5,
   textColor: '#ffffff',
   opacity: 0.5,
   position: 'center',

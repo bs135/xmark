@@ -86,17 +86,56 @@ export const WatermarkConfigPanel: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[11px] text-slate-400 block mb-1">
-                    Font Size ({config.fontSize}px)
-                  </label>
-                  <input
-                    type="range"
-                    min="12"
-                    max="140"
-                    value={config.fontSize}
-                    onChange={(e) => updateConfig({ fontSize: Number(e.target.value) })}
-                    className="w-full accent-sky-500 cursor-pointer"
-                  />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-[11px] text-slate-400">
+                      Font Size (
+                      {config.fontSizeUnit === 'percent'
+                        ? `${config.fontSizePercent}%`
+                        : `${config.fontSize}px`}
+                      )
+                    </label>
+                    <div className="flex rounded overflow-hidden border border-slate-700 text-[10px]">
+                      <button
+                        onClick={() => updateConfig({ fontSizeUnit: 'px' })}
+                        className={`px-1.5 py-0.5 ${
+                          config.fontSizeUnit === 'px'
+                            ? 'bg-sky-600 text-white'
+                            : 'bg-slate-950 text-slate-400'
+                        }`}
+                      >
+                        px
+                      </button>
+                      <button
+                        onClick={() => updateConfig({ fontSizeUnit: 'percent' })}
+                        className={`px-1.5 py-0.5 ${
+                          config.fontSizeUnit === 'percent'
+                            ? 'bg-sky-600 text-white'
+                            : 'bg-slate-950 text-slate-400'
+                        }`}
+                      >
+                        %
+                      </button>
+                    </div>
+                  </div>
+                  {config.fontSizeUnit === 'percent' ? (
+                    <input
+                      type="range"
+                      min="1"
+                      max="20"
+                      value={config.fontSizePercent}
+                      onChange={(e) => updateConfig({ fontSizePercent: Number(e.target.value) })}
+                      className="w-full accent-sky-500 cursor-pointer"
+                    />
+                  ) : (
+                    <input
+                      type="range"
+                      min="12"
+                      max="140"
+                      value={config.fontSize}
+                      onChange={(e) => updateConfig({ fontSize: Number(e.target.value) })}
+                      className="w-full accent-sky-500 cursor-pointer"
+                    />
+                  )}
                 </div>
 
                 <div>

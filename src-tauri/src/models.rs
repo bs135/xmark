@@ -56,6 +56,10 @@ pub struct WatermarkConfig {
     pub text: String,
     pub use_text: bool,
     pub font_size: f32,
+    #[serde(default = "default_font_size_unit")]
+    pub font_size_unit: String, // "px" | "percent"
+    #[serde(default = "default_font_size_percent")]
+    pub font_size_percent: f32, // 1.0 to 20.0 (% of base image width)
     pub text_color: String, // hex "#ffffff"
 
     // Common properties
@@ -75,6 +79,8 @@ impl Default for WatermarkConfig {
             text: String::new(),
             use_text: false,
             font_size: 36.0,
+            font_size_unit: default_font_size_unit(),
+            font_size_percent: default_font_size_percent(),
             text_color: "#ffffff".to_string(),
             opacity: 0.5,
             position: Position::Center,
@@ -83,6 +89,14 @@ impl Default for WatermarkConfig {
             rotation_deg: 0.0,
         }
     }
+}
+
+fn default_font_size_unit() -> String {
+    "px".to_string()
+}
+
+fn default_font_size_percent() -> f32 {
+    5.0
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
