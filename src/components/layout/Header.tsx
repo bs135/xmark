@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Layers, Minus, Square, Copy, X, Sun, Moon, Languages } from 'lucide-react';
+import { Minus, Square, Copy, X, Sun, Moon, Languages } from 'lucide-react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { useTranslation } from 'react-i18next';
 import { useAppStore, type Language } from '../../store/useAppStore';
@@ -31,8 +31,8 @@ export const Header: React.FC = () => {
       className="h-12 bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 pl-4 flex items-center justify-between select-none"
     >
       <div data-tauri-drag-region className="flex items-center gap-2 flex-1 h-full">
-        <div className="w-7 h-7 bg-sky-500 rounded flex items-center justify-center shadow-md pointer-events-none">
-          <Layers className="w-4 h-4 text-slate-950 font-bold" />
+        <div className="w-7 h-7 rounded flex items-center justify-center shadow-md pointer-events-none overflow-hidden">
+          <img src="/favicon.svg" alt="xMark" className="w-full h-full" />
         </div>
         <div className="flex items-baseline gap-1.5 pointer-events-none">
           <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white m-0">xMark</h1>
