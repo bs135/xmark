@@ -17,30 +17,30 @@
     "removeFromList": "Xóa khỏi danh sách"
   },
   "watermark": {
-    "settings": "Cài đặt Watermark",
+    "settings": "Cài đặt",
     "reset": "Đặt lại",
-    "textWatermark": "Watermark chữ",
-    "textContent": "Nội dung chữ",
+    "textWatermark": "Chữ",
+    "textContent": "Nội dung",
     "textPlaceholder": "vd. © 2026 xMark",
     "fontSize": "Kích thước chữ",
     "fontFamily": "Phông chữ",
     "bold": "In đậm",
     "italic": "In nghiêng",
     "textColor": "Màu chữ",
-    "logoImage": "Logo / Hình ảnh",
+    "logoImage": "Logo",
     "changeLogo": "Đổi logo...",
     "selectLogo": "Chọn file logo...",
     "logoScale": "Tỉ lệ logo",
-    "appearancePosition": "Hiển thị & Vị trí",
+    "appearancePosition": "Hiển thị",
     "opacity": "Độ mờ",
-    "patternRepeat": "Kiểu / Lặp lại",
+    "patternRepeat": "Lặp lại",
     "singlePosition": "Một vị trí",
-    "tileRepeat": "Lặp lại (tile)",
-    "positionGrid": "Vị trí (lưới 9 điểm)",
+    "tileRepeat": "Lặp lại",
+    "positionGrid": "Vị trí",
     "paddingMargin": "Khoảng cách lề"
   },
   "preview": {
-    "livePreview": "Xem trước trực tiếp",
+    "livePreview": "Xem trước",
     "selectImage": "Chọn một ảnh để xem trước",
     "selectImageHint": "Thêm ảnh từ danh sách bên trái để bắt đầu đóng watermark"
   },
@@ -54,6 +54,6 @@
     "done": "Hoàn tất! Đã xuất {{succeeded}}/{{total}} ảnh.",
     "processing": "Đang xử lý {{current}}/{{total}} ({{currentFile}})",
     "processingShort": "Đang xử lý...",
-    "applyExport": "Áp dụng & Xuất tất cả"
+    "applyExport": "Áp dụng tất cả"
   }
 }

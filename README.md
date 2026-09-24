@@ -5,7 +5,9 @@
 
 **xMark** is a fast, cross-platform desktop application for batch watermarking images with a logo, text, or both. It combines a Rust backend (via [Tauri](https://tauri.app)) for high-performance image processing with a React + Tailwind CSS frontend for an intuitive user experience.
 
-Supported platforms: **Windows**, **macOS** (Apple Silicon & Intel), and **Linux**.
+Supported platforms: **Windows**, **macOS** (Apple Silicon), and **Linux**.
+
+![xMark Screenshot](docs/screenshot.png)
 
 ---
 
@@ -40,11 +42,13 @@ Supported platforms: **Windows**, **macOS** (Apple Silicon & Intel), and **Linux
 
 Prebuilt installers for every release are published on the [GitHub Releases](https://github.com/bs135/xmark/releases) page:
 
-- **Windows**: `.msi` or `.exe` (NSIS) installer.
-- **macOS**: `.dmg` disk image (separate builds for Apple Silicon and Intel).
-- **Linux**: `.deb`, `.rpm`, or `.AppImage`.
+- **Windows**: `xMark_<version>_windows_x64-setup.exe` (NSIS) or `xMark_<version>_windows_x64.msi` (WiX).
+- **macOS**: `xMark_<version>_darwin_aarch64.dmg` (Apple Silicon M1/M2/M3).
+- **Linux**: `xMark_<version>_linux_amd64.deb`, `xMark_<version>_linux_amd64.AppImage`, or `xMark_<version>_linux_x86_64.rpm`.
 
-To try an in-progress branch build, trigger the **Build Artifacts (manual)** workflow from the [Actions](https://github.com/bs135/xmark/actions) tab and download the resulting artifact.
+Release assets are formatted with platform and architecture identifiers (`[name]_[version]_[platform]_[arch][setup][ext]`).
+
+To try an in-progress branch build, trigger the **Release** workflow via `workflow_dispatch` from the [Actions](https://github.com/bs135/xmark/actions) tab and download the resulting artifacts.
 
 ---
 
@@ -121,20 +125,20 @@ src-tauri/target/release/bundle/
    - Click an image in the list to preview it, or the trash icon to remove it from the list.
 
 2. **Configure the watermark (right panel)**
-   - **Text Watermark**: enable the checkbox, enter text content, adjust font size and color.
-   - **Logo/Image**: enable the checkbox, choose a logo file, and drag the slider to adjust scale.
+   - **Text**: enable the checkbox, enter text content, adjust font size and color.
+   - **Logo**: enable the checkbox, choose a logo file, and drag the slider to adjust scale.
    - **Opacity**: adjust from 5% to 100% (default 50%).
    - **Repeat**:
      - *Single Position*: stamp the watermark at one fixed position on a 9-point grid (top-left, center, bottom-right, etc.).
      - *Tile Repeat*: repeat the watermark evenly across the entire image as an anti-copy grid pattern.
-   - **Padding/Margin**: fine-tune the distance from the edges.
+   - **Padding**: fine-tune the distance from the edges.
 
-3. **Live Preview (center panel)**
+3. **Preview (center panel)**
    - See a real-time watermark preview on canvas before exporting.
 
 4. **Batch export (footer bar)**
    - Click **Choose Output Folder** to select where processed images will be saved.
-   - Click **Apply & Export All** to start high-speed, multi-threaded processing powered by Rayon in Rust.
+   - Click **Apply All** to start high-speed, multi-threaded processing powered by Rayon in Rust.
    - Track progress and completion status in the status bar.
 
 ---

@@ -4,7 +4,7 @@
 
 Tất cả yêu cầu đều khả thi với kiến trúc hiện tại (Tauri v2 + React + Rust). Điều chỉnh nhỏ:
 
-- **CI/CD**: Tauri v2 hỗ trợ build đa nền tảng qua `tauri-action` (GitHub Action chính thức của tauri-apps) chạy trên runner `macos-14` (Apple Silicon ARM64), `macos-13` (Intel x64), `windows-latest`, `ubuntu-22.04`. Semver tag tự động cần một bước "bump version + tạo tag" trước khi gọi `tauri-action` (action này tự tạo GitHub Release khi có tag `v*`).
+- **CI/CD**: Tauri v2 hỗ trợ build đa nền tảng qua `tauri-action` (GitHub Action chính thức của tauri-apps) chạy trên runner `macos-14` (Apple Silicon ARM64), `windows-latest`, `ubuntu-22.04` (đã bỏ runner `macos-13` Intel x64). Semver tag tự động cần một bước "bump version + tạo tag" trước khi gọi `tauri-action` (action này tự tạo GitHub Release khi có tag `v*`). Thêm mẫu `assetNamePattern` để bổ sung platform vào tên file release asset. Gộp luồng `workflow_dispatch` trực tiếp vào `release.yml`.
 - **Chặn F5 / Context menu**: Đây là hành vi mặc định của WebView2 (Windows)/WKWebView (macOS)/WebKitGTK (Linux). Cách xử lý chuẩn nhất và nhất quán trên cả 3 nền tảng là chặn ở tầng JavaScript (frontend): lắng nghe sự kiện `keydown` (chặn F5, Ctrl+R, Cmd+R) và `contextmenu` (chặn menu chuột phải mặc định) ở cấp `window`, không cần code Rust riêng cho từng nền tảng.
 - **App icon**: Cần cài thêm `@tauri-apps/cli` đã có sẵn `tauri icon` command để sinh toàn bộ icon set (png/ico/icns đủ kích thước) từ 1 file nguồn (khuyến nghị PNG nguồn ≥1024x1024, nhưng CLI hỗ trợ nhận input SVG qua rendering thư viện `resvg` tích hợp sẵn). Sẽ dùng lệnh `npx tauri icon .tmp/icon.svg` để tạo lại toàn bộ `src-tauri/icons/`.
 - **Title bar icon**: Hiện tại `Header.tsx` đang dùng icon `Layers` (lucide-react) trong khối vuông màu sky-500 làm logo hiển thị trên custom titlebar → thay bằng ảnh PNG xuất ra từ icon mới.
@@ -27,20 +27,21 @@ File: `.github/workflows/release.yml`
    - Sinh changelog tự động từ commit log (dùng `mikepenz/release-changelog-builder-action` hoặc changelog do `release-please`/`mathieudutour` xuất kèm).
    - Output: tag mới + changelog body (dùng cho bước release).
    - Nếu không có thay đổi đáng release (không commit nào match convention) → job kết thúc sớm, không tạo tag.
-2. Job `build-and-release` (matrix, cần `bump-tag` xong và có tag mới):
-   - Matrix:
+2. Job `build-and-release` (matrix, cần `bump-tag` xong và có tag mới khi push, hoặc chạy trực tiếp khi dispatch):
+   - Matrix (hỗ trợ 3 nền tảng chính sau khi lược bỏ macOS Intel):
      | OS runner | Target | Platform |
      |---|---|---|
      | `macos-14` | `aarch64-apple-darwin` | macOS ARM64 (M1/M2/M3) |
-     | `macos-13` | `x86_64-apple-darwin` | macOS x64 (Intel) |
      | `windows-latest` | `x86_64-pc-windows-msvc` | Windows x64 |
      | `ubuntu-22.04` | `x86_64-unknown-linux-gnu` | Linux x64 |
-   - Steps mỗi job: checkout → cài Node (`actions/setup-node`) + cài Rust (`dtolnay/rust-toolchain` với target tương ứng) → cài dependency hệ thống cho Linux (`webkit2gtk`, `libayatana-appindicator3-dev`, v.v. qua `apt-get`) → `npm ci` → dùng `tauri-apps/tauri-action@v0` với `releaseId`/`tagName: v__VERSION__`, `releaseBody` = changelog từ job trước, `releaseDraft: false`, `prerelease: false`.
-   - `tauri-action` tự build đúng bundle theo OS (msi/nsis cho Windows, dmg/app cho macOS, deb/AppImage/rpm cho Linux) và upload vào GitHub Release đã tạo theo tag.
+   - Steps mỗi job: checkout → cài Node (`actions/setup-node`) + cài Rust (`dtolnay/rust-toolchain` với target tương ứng) → cài dependency hệ thống cho Linux (`webkit2gtk`, `libayatana-appindicator3-dev`, v.v. qua `apt-get`) → `npm ci` → dùng `tauri-apps/tauri-action@v0` với:
+     - `assetNamePattern: "[name]_[version]_[platform]_[arch][setup][ext]"` và `releaseAssetNamePattern` để đưa định danh platform (`darwin`, `windows`, `linux`) cùng kiến trúc vào tên file artifact trên GitHub Release (ví dụ: `xMark_0.3.0_darwin_aarch64.dmg`, `xMark_0.3.0_windows_x64-setup.exe`, `xMark_0.3.0_linux_amd64.deb`).
+     - Khi `push`: tự động tạo/cập nhật GitHub Release với các asset đã được đặt tên theo pattern.
+     - Khi `workflow_dispatch`: chỉ build bundle và upload artifacts qua `actions/upload-artifact@v4`, không tạo release/tag.
 
-**Trigger 2 — `workflow_dispatch`:**
-- Cùng matrix 4 nền tảng, nhưng **không tạo tag/release**, chỉ build và `actions/upload-artifact` (giữ artifact ~7-14 ngày) để tải về test nhánh làm việc hiện tại (dùng `ref` mặc định của nhánh gọi dispatch, cho phép chọn qua input `branch` nếu cần).
-- Có thể tách thành workflow riêng `.github/workflows/build-artifact.yml` để tách biệt rõ ràng với luồng release chính thức (khuyến nghị, tránh 1 file quá phức tạp với nhiều điều kiện `if`).
+**Trigger 2 — `workflow_dispatch` (hợp nhất trong `release.yml`):**
+- Sử dụng chung matrix trong `.github/workflows/release.yml`, kích hoạt thủ công từ giao diện GitHub Actions (chạy trên nhánh được chọn).
+- Chỉ chạy các bước build bundle và tải lên GitHub Actions Artifacts mà không chạy các bước tạo tag/release. Không cần duy trì file workflow riêng `build-artifact.yml`.
 
 **Version source of truth**: đồng bộ version giữa `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json` (workflow bump sẽ cập nhật cả 3 file rồi commit lại `chore(release): vX.Y.Z` trước khi tạo tag).
 
