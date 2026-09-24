@@ -86,17 +86,17 @@ export const WatermarkConfigPanel: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-3">
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-[11px] text-slate-600 dark:text-slate-400">
+                  <div className="flex items-center justify-between mb-1 gap-2">
+                    <label className="text-[11px] text-slate-600 dark:text-slate-400 truncate">
                       {t('watermark.fontSize')} (
                       {config.fontSizeUnit === 'percent'
                         ? `${config.fontSizePercent}%`
                         : `${config.fontSize}px`}
                       )
                     </label>
-                    <div className="flex rounded overflow-hidden border border-slate-300 dark:border-slate-700 text-[10px]">
+                    <div className="flex rounded overflow-hidden border border-slate-300 dark:border-slate-700 text-[10px] flex-shrink-0">
                       <button
                         onClick={() => updateConfig({ fontSizeUnit: 'px' })}
                         className={`px-1.5 py-0.5 ${
