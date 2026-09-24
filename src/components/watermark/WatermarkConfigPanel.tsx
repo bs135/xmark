@@ -181,9 +181,6 @@ export const WatermarkConfigPanel: React.FC = () => {
                         onChange={(e) => updateConfig({ fontSizePercent: Number(e.target.value) })}
                         className="w-full accent-sky-500 cursor-pointer"
                       />
-                      <p className="text-[10px] text-slate-500 dark:text-slate-500 mt-0.5">
-                        {t('watermark.fontSizePercentHint')}
-                      </p>
                     </>
                   ) : (
                     <input
