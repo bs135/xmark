@@ -7,6 +7,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch to build (defaults to the branch this workflow is run from)
+        required: false
+        type: string
 
 concurrency:
   group: release-${{ github.ref }}
@@ -15,6 +21,7 @@ concurrency:
 jobs:
   tag-release:
     name: Determine version and create tag
+    if: github.event_name == 'push'
     runs-on: ubuntu-22.04
     permissions:
       contents: write
@@ -83,7 +90,7 @@ jobs:
   build-and-release:
     name: Build (${{ matrix.platform }})
     needs: tag-release
-    if: needs.tag-release.outputs.released == 'true'
+    if: always() && !cancelled() && ((github.event_name == 'push' && needs.tag-release.result == 'success' && needs.tag-release.outputs.released == 'true') || github.event_name == 'workflow_dispatch')
     permissions:
       contents: write
     strategy:
@@ -107,7 +114,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.tag-release.outputs.new_tag }}
+          ref: ${{ github.event_name == 'push' && needs.tag-release.outputs.new_tag || inputs.branch || github.ref }}
 
       - name: Install Linux system dependencies
         if: matrix.os == 'ubuntu-22.04'
@@ -136,6 +143,7 @@ jobs:
         run: npm ci
 
       - name: Build and release
+        if: github.event_name == 'push'
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -148,3 +156,21 @@ jobs:
           args: ${{ matrix.args }}
           assetNamePattern: "[name]_[version]_[platform]_[arch][setup][ext]"
           releaseAssetNamePattern: "[name]_[version]_[platform]_[arch][setup][ext]"
+
+      - name: Build app bundles
+        if: github.event_name == 'workflow_dispatch'
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: ${{ matrix.args }}
+
+      - name: Upload artifacts
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: xmark-${{ matrix.rust_target }}
+          path: |
+            src-tauri/target/**/release/bundle/**
+          retention-days: 14
+          if-no-files-found: error
