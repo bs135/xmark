@@ -1,9 +1,17 @@
 import React from 'react';
 import { useAppStore } from '../../store/useAppStore';
-import type { Position, RepeatMode } from '../../types/watermark';
-import { Image, Type, Sliders, LayoutGrid } from 'lucide-react';
+import type { FontFamily, Position, RepeatMode } from '../../types/watermark';
+import { Image, Type, Sliders, LayoutGrid, Bold, Italic } from 'lucide-react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { useTranslation } from 'react-i18next';
+
+const FONT_FAMILIES: { id: FontFamily; label: string; cssFamily: string }[] = [
+  { id: 'inter', label: 'Inter', cssFamily: '"Inter", sans-serif' },
+  { id: 'roboto', label: 'Roboto', cssFamily: '"Roboto", sans-serif' },
+  { id: 'robotomono', label: 'Roboto Mono', cssFamily: '"Roboto Mono", monospace' },
+  { id: 'arvo', label: 'Arvo', cssFamily: '"Arvo", serif' },
+  { id: 'pacifico', label: 'Pacifico', cssFamily: '"Pacifico", cursive' },
+];
 
 export const WatermarkConfigPanel: React.FC = () => {
   const { config, updateConfig, resetConfig } = useAppStore();
@@ -88,6 +96,50 @@ export const WatermarkConfigPanel: React.FC = () => {
 
               <div className="space-y-3">
                 <div>
+                  <label className="text-[11px] text-slate-600 dark:text-slate-400 block mb-1">
+                    {t('watermark.fontFamily')}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={config.fontFamily}
+                      onChange={(e) => updateConfig({ fontFamily: e.target.value as FontFamily })}
+                      className="flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded px-2 py-1.5 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500 text-xs"
+                      style={{
+                        fontFamily: FONT_FAMILIES.find((f) => f.id === config.fontFamily)?.cssFamily,
+                      }}
+                    >
+                      {FONT_FAMILIES.map((f) => (
+                        <option key={f.id} value={f.id} style={{ fontFamily: f.cssFamily }}>
+                          {f.label}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => updateConfig({ bold: !config.bold })}
+                      title={t('watermark.bold') ?? undefined}
+                      className={`h-7 w-7 flex items-center justify-center rounded border transition ${
+                        config.bold
+                          ? 'bg-sky-600 text-white border-sky-600'
+                          : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'
+                      }`}
+                    >
+                      <Bold className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => updateConfig({ italic: !config.italic })}
+                      title={t('watermark.italic') ?? undefined}
+                      className={`h-7 w-7 flex items-center justify-center rounded border transition ${
+                        config.italic
+                          ? 'bg-sky-600 text-white border-sky-600'
+                          : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'
+                      }`}
+                    >
+                      <Italic className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div>
                   <div className="flex items-center justify-between mb-1 gap-2">
                     <label className="text-[11px] text-slate-600 dark:text-slate-400 truncate">
                       {t('watermark.fontSize')} (
@@ -120,19 +172,24 @@ export const WatermarkConfigPanel: React.FC = () => {
                     </div>
                   </div>
                   {config.fontSizeUnit === 'percent' ? (
-                    <input
-                      type="range"
-                      min="1"
-                      max="20"
-                      value={config.fontSizePercent}
-                      onChange={(e) => updateConfig({ fontSizePercent: Number(e.target.value) })}
-                      className="w-full accent-sky-500 cursor-pointer"
-                    />
+                    <>
+                      <input
+                        type="range"
+                        min="1"
+                        max="80"
+                        value={config.fontSizePercent}
+                        onChange={(e) => updateConfig({ fontSizePercent: Number(e.target.value) })}
+                        className="w-full accent-sky-500 cursor-pointer"
+                      />
+                      <p className="text-[10px] text-slate-500 dark:text-slate-500 mt-0.5">
+                        {t('watermark.fontSizePercentHint')}
+                      </p>
+                    </>
                   ) : (
                     <input
                       type="range"
                       min="12"
-                      max="140"
+                      max="250"
                       value={config.fontSize}
                       onChange={(e) => updateConfig({ fontSize: Number(e.target.value) })}
                       className="w-full accent-sky-500 cursor-pointer"

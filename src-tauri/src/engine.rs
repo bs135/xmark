@@ -6,8 +6,24 @@ use std::path::Path;
 
 use crate::models::{Position, RepeatMode, WatermarkConfig};
 
-// Embedded default font for reliable cross-platform rendering
-const DEFAULT_FONT_DATA: &[u8] = include_bytes!("../assets/fonts/Inter-Regular.ttf");
+// Embedded fonts for reliable cross-platform rendering, offered as
+// selectable "font family" choices in the watermark settings. All are OFL
+// licensed (see assets/fonts/NOTICE.md).
+const FONT_INTER: &[u8] = include_bytes!("../assets/fonts/Inter-Regular.ttf");
+const FONT_ROBOTO: &[u8] = include_bytes!("../assets/fonts/Roboto-Regular.ttf");
+const FONT_ROBOTO_MONO: &[u8] = include_bytes!("../assets/fonts/RobotoMono-Regular.ttf");
+const FONT_ARVO: &[u8] = include_bytes!("../assets/fonts/Arvo-Regular.ttf");
+const FONT_PACIFICO: &[u8] = include_bytes!("../assets/fonts/Pacifico-Regular.ttf");
+
+fn font_data_for(family: &str) -> &'static [u8] {
+    match family {
+        "roboto" => FONT_ROBOTO,
+        "robotomono" => FONT_ROBOTO_MONO,
+        "arvo" => FONT_ARVO,
+        "pacifico" => FONT_PACIFICO,
+        _ => FONT_INTER,
+    }
+}
 
 pub fn parse_hex_color(hex: &str, alpha: f32) -> Rgba<u8> {
     let clean = hex.trim_start_matches('#');
@@ -28,6 +44,67 @@ pub fn parse_hex_color(hex: &str, alpha: f32) -> Rgba<u8> {
     };
     let a = (alpha.clamp(0.0, 1.0) * 255.0) as u8;
     Rgba([r, g, b, a])
+}
+
+/// Synthesizes a "faux bold" effect by dilating the alpha channel: every
+/// pixel becomes the max alpha found within a small radius. Used because the
+/// bundled fonts only ship a Regular weight, so an actual bold face isn't
+/// available to select instead.
+fn apply_faux_bold(img: &RgbaImage, strength_px: u32) -> RgbaImage {
+    if strength_px == 0 {
+        return img.clone();
+    }
+    let (w, h) = img.dimensions();
+    let r = strength_px as i64;
+    let mut out = img.clone();
+    for y in 0..h {
+        for x in 0..w {
+            let mut max_a = 0u8;
+            let mut color = Rgba([0, 0, 0, 0]);
+            for dy in -r..=r {
+                for dx in -r..=r {
+                    let sx = x as i64 + dx;
+                    let sy = y as i64 + dy;
+                    if sx < 0 || sy < 0 || sx >= w as i64 || sy >= h as i64 {
+                        continue;
+                    }
+                    let p = img.get_pixel(sx as u32, sy as u32);
+                    if p[3] > max_a {
+                        max_a = p[3];
+                        color = *p;
+                    }
+                }
+            }
+            if max_a > 0 {
+                out.put_pixel(x, y, Rgba([color[0], color[1], color[2], max_a]));
+            }
+        }
+    }
+    out
+}
+
+/// Synthesizes an "oblique/italic" effect by shearing the image horizontally
+/// based on vertical position (classic faux-italic technique), then trims
+/// the result back to its visible bounds.
+fn apply_faux_italic(img: &RgbaImage) -> RgbaImage {
+    let (w, h) = img.dimensions();
+    let shear = 0.22f32; // shear factor, similar to typical synthetic italic angle
+    let extra_w = (h as f32 * shear).ceil() as u32;
+    let mut out: RgbaImage = ImageBuffer::new(w + extra_w, h);
+    for y in 0..h {
+        let offset = ((h as f32 - 1.0 - y as f32) * shear).round() as i64;
+        for x in 0..w {
+            let pixel = *img.get_pixel(x, y);
+            if pixel[3] == 0 {
+                continue;
+            }
+            let dst_x = x as i64 + offset;
+            if dst_x >= 0 && (dst_x as u32) < out.width() {
+                out.put_pixel(dst_x as u32, y, pixel);
+            }
+        }
+    }
+    out
 }
 
 /// Trim fully-transparent margins from a rendered RGBA image so that the
@@ -82,17 +159,20 @@ fn trim_transparent(img: &RgbaImage) -> Option<RgbaImage> {
     Some(imageops::crop_imm(img, crop_x, crop_y, crop_w, crop_h).to_image())
 }
 
-pub fn render_text_as_image(
+pub fn render_text_as_image_styled(
     text: &str,
     font_size: f32,
     color_hex: &str,
     opacity: f32,
+    font_family: &str,
+    bold: bool,
+    italic: bool,
 ) -> Option<RgbaImage> {
     if text.trim().is_empty() {
         return None;
     }
 
-    let font = FontRef::try_from_slice(DEFAULT_FONT_DATA).ok()?;
+    let font = FontRef::try_from_slice(font_data_for(font_family)).ok()?;
     let scale = PxScale::from(font_size);
 
     // Accurately measure the text using real glyph metrics instead of a
@@ -101,6 +181,8 @@ pub fn render_text_as_image(
     // image has no hidden blank space that would otherwise shift the
     // watermark off-center when it gets positioned later.
     let (measured_w, measured_h) = text_size(scale, &font, text);
+    // Extra padding accommodates the italic shear and faux-bold dilation
+    // without clipping, in addition to anti-aliasing bleed.
     let padding = (font_size * 0.5).ceil().max(8.0) as u32;
     let width = measured_w.max(1) + padding * 2;
     let height = measured_h.max(1) + padding * 2;
@@ -110,27 +192,40 @@ pub fn render_text_as_image(
 
     draw_text_mut(&mut img, color, padding as i32, padding as i32, scale, &font, text);
 
+    if bold {
+        let strength = (font_size / 60.0).round().max(1.0) as u32;
+        img = apply_faux_bold(&img, strength);
+    }
+    if italic {
+        img = apply_faux_italic(&img);
+    }
+
     trim_transparent(&img)
 }
 
 /// Render text to an image sized as a percentage of the base image's width,
 /// preserving legibility by measuring at a high base font size first, then
 /// resizing (similar to how the logo watermark is scaled).
+#[allow(clippy::too_many_arguments)]
 pub fn render_text_as_percent_image(
     text: &str,
     target_base_w: u32,
     percent: f32,
     color_hex: &str,
     opacity: f32,
+    font_family: &str,
+    bold: bool,
+    italic: bool,
 ) -> Option<RgbaImage> {
     const BASE_FONT_SIZE: f32 = 120.0;
-    let source = render_text_as_image(text, BASE_FONT_SIZE, color_hex, opacity)?;
+    let source =
+        render_text_as_image_styled(text, BASE_FONT_SIZE, color_hex, opacity, font_family, bold, italic)?;
     let (src_w, src_h) = source.dimensions();
     if src_w == 0 || src_h == 0 {
         return None;
     }
 
-    let desired_w = ((target_base_w as f32) * (percent.clamp(0.5, 50.0) / 100.0))
+    let desired_w = ((target_base_w as f32) * (percent.clamp(0.5, 90.0) / 100.0))
         .max(4.0) as u32;
     let aspect = src_h as f32 / src_w as f32;
     let desired_h = ((desired_w as f32) * aspect).max(4.0) as u32;
@@ -308,9 +403,20 @@ pub fn process_single_image(
                 config.font_size_percent,
                 &config.text_color,
                 config.opacity,
+                &config.font_family,
+                config.bold,
+                config.italic,
             )
         } else {
-            render_text_as_image(&config.text, config.font_size, &config.text_color, config.opacity)
+            render_text_as_image_styled(
+                &config.text,
+                config.font_size,
+                &config.text_color,
+                config.opacity,
+                &config.font_family,
+                config.bold,
+                config.italic,
+            )
         }
     } else {
         None

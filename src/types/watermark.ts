@@ -20,6 +20,8 @@ export interface ImageFileInfo {
   extension: string;
 }
 
+export type FontFamily = 'inter' | 'roboto' | 'robotomono' | 'arvo' | 'pacifico';
+
 export interface WatermarkConfig {
   // Image watermark
   imagePath?: string;
@@ -29,9 +31,12 @@ export interface WatermarkConfig {
   // Text watermark
   text: string;
   useText: boolean;
-  fontSize: number;
+  fontSize: number; // 12 to 250 px
   fontSizeUnit: 'px' | 'percent';
-  fontSizePercent: number; // 1 to 20 (% of base image width)
+  fontSizePercent: number; // 1 to 80 (% of the whole text line's width relative to the input image width)
+  fontFamily: FontFamily;
+  bold: boolean;
+  italic: boolean;
   textColor: string; // hex "#ffffff"
 
   // Common properties

@@ -11,6 +11,16 @@ import type { WatermarkConfig } from '../../types/watermark';
 const STACK_SPACING_BASE_PX = 12;
 const BASE_REFERENCE_WIDTH = 800;
 
+// Keep in sync with FONT_FAMILIES in WatermarkConfigPanel.tsx and the
+// font_data_for() mapping in src-tauri/src/engine.rs.
+const FONT_FAMILY_CSS: Record<string, string> = {
+  inter: '"Inter", sans-serif',
+  roboto: '"Roboto", sans-serif',
+  robotomono: '"Roboto Mono", monospace',
+  arvo: '"Arvo", serif',
+  pacifico: '"Pacifico", cursive',
+};
+
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -48,9 +58,23 @@ function getBoxCoords(pos: string, w: number, h: number, boxW: number, boxH: num
   }
 }
 
+function buildFontString(fontSizePx: number, family: string, bold: boolean, italic: boolean) {
+  const cssFamily = FONT_FAMILY_CSS[family] ?? FONT_FAMILY_CSS.inter;
+  const weight = bold ? 'bold' : 'normal';
+  const style = italic ? 'italic' : 'normal';
+  return `${style} ${weight} ${fontSizePx}px ${cssFamily}`;
+}
+
 /** Measures rendered text width/height at a given font size using canvas metrics. */
-function measureText(ctx: CanvasRenderingContext2D, text: string, fontSizePx: number) {
-  ctx.font = `bold ${fontSizePx}px "Inter", sans-serif`;
+function measureText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  fontSizePx: number,
+  family: string,
+  bold: boolean,
+  italic: boolean,
+) {
+  ctx.font = buildFontString(fontSizePx, family, bold, italic);
   const metrics = ctx.measureText(text);
   const width = metrics.width;
   const ascent = metrics.actualBoundingBoxAscent ?? fontSizePx * 0.8;
@@ -88,9 +112,14 @@ export const LivePreview: React.FC = () => {
     const run = async () => {
       let baseImg: HTMLImageElement;
       try {
-        // Ensure the Inter webfont is ready so canvas text metrics line up
-        // with the Inter font actually used by the Rust rendering engine.
-        await document.fonts.ready;
+        // Ensure the selected watermark webfont is actually loaded so canvas
+        // text metrics line up with the font the Rust rendering engine uses
+        // (fonts are otherwise only fetched lazily on first real use).
+        const family = FONT_FAMILY_CSS[debouncedConfig.fontFamily] ?? FONT_FAMILY_CSS.inter;
+        await Promise.all([
+          document.fonts.load(`16px ${family}`),
+          document.fonts.ready,
+        ]);
         baseImg = await loadImage(convertFileSrc(currentFile.path));
       } catch {
         return;
@@ -125,24 +154,30 @@ export const LivePreview: React.FC = () => {
       const resolveTextMetrics = () => {
         if (!debouncedConfig.useText || !debouncedConfig.text.trim()) return null;
         const text = debouncedConfig.text;
+        const { fontFamily, bold, italic } = debouncedConfig;
 
         if (debouncedConfig.fontSizeUnit === 'percent') {
           const targetWidth = w * (debouncedConfig.fontSizePercent / 100);
           const probeSize = 100;
-          const probe = measureText(ctx, text, probeSize);
+          const probe = measureText(ctx, text, probeSize, fontFamily, bold, italic);
           const fontSizePx = probe.width > 0 ? probeSize * (targetWidth / probe.width) : probeSize;
-          return { fontSizePx, ...measureText(ctx, text, fontSizePx) };
+          return { fontSizePx, ...measureText(ctx, text, fontSizePx, fontFamily, bold, italic) };
         }
 
         const fontSizePx = Math.max(8, debouncedConfig.fontSize * scaleFactor);
-        return { fontSizePx, ...measureText(ctx, text, fontSizePx) };
+        return { fontSizePx, ...measureText(ctx, text, fontSizePx, fontFamily, bold, italic) };
       };
 
       const textMetrics = resolveTextMetrics();
 
       const drawTextAt = (x: number, y: number) => {
         if (!textMetrics) return;
-        ctx.font = `bold ${textMetrics.fontSizePx}px "Inter", sans-serif`;
+        ctx.font = buildFontString(
+          textMetrics.fontSizePx,
+          debouncedConfig.fontFamily,
+          debouncedConfig.bold,
+          debouncedConfig.italic,
+        );
         ctx.fillStyle = debouncedConfig.textColor || '#ffffff';
         ctx.textBaseline = 'alphabetic';
         ctx.fillText(debouncedConfig.text, x, y + textMetrics.ascent);

@@ -59,7 +59,13 @@ pub struct WatermarkConfig {
     #[serde(default = "default_font_size_unit")]
     pub font_size_unit: String, // "px" | "percent"
     #[serde(default = "default_font_size_percent")]
-    pub font_size_percent: f32, // 1.0 to 20.0 (% of base image width)
+    pub font_size_percent: f32, // 1.0 to 80.0 (% of the whole text line's width relative to the base image width)
+    #[serde(default = "default_font_family")]
+    pub font_family: String, // "inter" | "roboto" | "robotomono" | "arvo" | "pacifico"
+    #[serde(default)]
+    pub bold: bool,
+    #[serde(default)]
+    pub italic: bool,
     pub text_color: String, // hex "#ffffff"
 
     // Common properties
@@ -81,6 +87,9 @@ impl Default for WatermarkConfig {
             font_size: 36.0,
             font_size_unit: default_font_size_unit(),
             font_size_percent: default_font_size_percent(),
+            font_family: default_font_family(),
+            bold: false,
+            italic: false,
             text_color: "#ffffff".to_string(),
             opacity: 0.5,
             position: Position::Center,
@@ -97,6 +106,10 @@ fn default_font_size_unit() -> String {
 
 fn default_font_size_percent() -> f32 {
     5.0
+}
+
+fn default_font_family() -> String {
+    "inter".to_string()
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
